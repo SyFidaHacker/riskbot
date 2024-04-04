@@ -31,6 +31,7 @@ module.exports = {
                     {name: 'Entrench', value: 'entrench'}
                 )),
         async execute(interaction) {
+            await interaction.reply(`Battle Commencing`);
             let attackers = interaction.options.getInteger('attackers');
             let defenders = interaction.options.getInteger('defenders');
             let attackerStance = interaction.options.getString('attacker_stance');
