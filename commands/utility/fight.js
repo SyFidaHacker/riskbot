@@ -33,7 +33,15 @@ module.exports = {
         async execute(interaction) {
             let attackers = interaction.options.getInteger('attackers');
             let defenders = interaction.options.getInteger('defenders');
+            let attackerStance = interaction.options.getString('attacker_stance');
+            let defenderStance = interaction.options.getString('defender_stance');
+            let totalAttackerDamage = 0;
+            let totalDefenderDamage = 0;
+            let rounds = 0;
+
             function calculateAttack(x, y){
+                // Increment round counter
+                rounds++;
 
                 // Running totals of the casualties inflicted by each side
                 let attackerDamage = 0;
@@ -42,7 +50,7 @@ module.exports = {
                 // 1d20 roll to see if either side hits a crit(damage) which deals ~90% max damage
                 let legendAttack = Math.floor(Math.random() * 20 + 1);
                 let legendDefense = Math.floor(Math.random() * 20 + 1);
-            
+
                 // 1d20 roll to see if either side hits a crit(armor) which reduces the enemy damage to ~10% of their max
                 let attackerMiracle = Math.floor(Math.random() * 20 + 1);
                 let defenderMiracle = Math.floor(Math.random() * 20 + 1);
@@ -122,6 +130,10 @@ module.exports = {
                         }
                     }
                 }
+
+                // Add each side's damage to the running total
+                totalAttackerDamage+= attackerDamage;
+                totalDefenderDamage+= defenderDamage;
             
                 // Calculate remaining troops by subtracting damage
                 x -= defenderDamage;
@@ -135,28 +147,58 @@ module.exports = {
                     y = 0;
                 }
 
-                 // Response object to return
-                 let response = {
-                    attackers: x,
-                    defenders: y,
-                    attackerCrit1: legendAttack,
-                    attackerCrit2: attackerMiracle,
-                    defenderCrit1: legendDefense,
-                    defenderCrit2: defenderMiracle,
-                    attackerDamage: attackerDamage,
-                    defenderDamage: defenderDamage,
-                    rounds: 0,
-                    victor: ''
+                // Ensure that total damage counters do not exceed the original troop counts
+                if (totalAttackerDamage > defenders){
+                    totalAttackerDamage = defenders;
                 }
-                console.log(attackerSkill)
-                console.log(defenderSkill)
-                //Return response object
-                return response;
+                if (totalDefenderDamage > attackers){
+                    totalDefenderDamage = attackers;
+                }
+
+                // Check if battle should run again based on army stance and troop count
+                if (x > 0 && y > 0 && attackerStance == 'assault' && defenderStance == 'retreat'){
+                    victor = 'Attackers';
+                    let response = {
+                        attackers: x,
+                        defenders: y,
+                        victor: victor
+                    }
+                    return response;
+                }
+                else if (y > 0 && attackerStance == 'raid'){
+                    victor = 'Defenders';
+                    let response = {
+                        attackers: x,
+                        defenders: y,
+                        victor: victor
+                    }
+                    return response;
+                }
+                else if (x < 1){
+                    victor = 'Defenders';
+                    let response = {
+                        attackers: x,
+                        defenders: y,
+                        victor: victor
+                    }
+                    return response;
+                }
+                else if (y < 1){
+                    victor = 'Attackers';
+                    let response = {
+                        attackers: x,
+                        defenders: y,
+                        victor: victor
+                    }
+                    return response;
+                }
+                else if (x > 0 && y > 0 && attackerStance == 'assault' && defenderStance == 'entrench'){
+                    return calculateAttack(x, y);
+                }
             }
             
             let res = calculateAttack(attackers, defenders);
-            
-            // await interaction.reply(`${res.attackers} and ${res.defenders}`);
+
             const exampleEmbed = new EmbedBuilder()
                 .setColor(0x0099FF)
                 .setTitle(`Jean Lafitte's Virginia Memorial Battle Simulator`)
@@ -164,20 +206,20 @@ module.exports = {
                 .setDescription(`"Mama ain't raised no wuss" -Jean Lafitte, 1815`)
                 .addFields(
                     { name: '\u200B', value: '\u200B' },
-                    { name: `Attacker crit(damage) roll`, value: `${res.attackerCrit1}`, inline: true },
-                    { name: `Defender crit(damage) roll`, value: `${res.defenderCrit1}`, inline: true },
+                    { name: 'Initial Attackers', value: `${attackers}`, inline: true },
+                    { name: 'Initial Defenders', value: `${defenders}`, inline: true },
                     { name: '\u200B', value: '\u200B' },
-                    { name: `Attacker crit(armor) roll`, value: `${res.attackerCrit2}`, inline: true },
-                    { name: `Defender crit(armor) roll`, value: `${res.defenderCrit2}`, inline: true },
+                    { name: 'Attacker stance', value: `${attackerStance}`, inline: true },
+                    { name: 'Defender stance', value: `${defenderStance}`, inline: true },
                     { name: '\u200B', value: '\u200B' },
-                    { name: 'Attacker damage', value: `${res.attackerDamage}`, inline: true },
-                    { name: 'Defender damage', value: `${res.defenderDamage}`, inline: true },
+                    { name: 'Attacker casualties', value: `${totalDefenderDamage}`, inline: true },
+                    { name: 'Defender casualties', value: `${totalAttackerDamage}`, inline: true },
                     { name: '\u200B', value: '\u200B' },
                     { name: 'Attackers remaining', value: `${res.attackers}`, inline: true },
                     { name: 'Defenders remaining', value: `${res.defenders}`, inline: true },
                     { name: '\u200B', value: '\u200B' },
-                    { name: 'Rounds fought', value: 'Some value here', inline: true },
-                    { name: 'Victor', value: 'Some value here', inline: true },
+                    { name: 'Rounds fought', value: `${rounds}`, inline: true },
+                    { name: 'Victor', value: `${res.victor}`, inline: true },
                     { name: '\u200B', value: '\u200B' }
                 )
                 .setTimestamp();
