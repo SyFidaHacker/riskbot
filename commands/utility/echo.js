@@ -1,5 +1,4 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { execute } = require('./ping');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -14,5 +13,5 @@ module.exports = {
                 .setDescription('Whether or not the echo should be ephemeral')),
         async execute(interaction) {
             await interaction.reply(`${interaction.options.getString(`input`)}`);
-        },
+        }
 }
