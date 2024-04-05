@@ -54,7 +54,8 @@ module.exports = {
                 let defenderDamage = 0;
             
                 // 1d20 roll to see if either side hits a crit(damage) which deals ~90% max damage
-                let legendAttack = Math.floor(Math.random() * 20 + 1);
+                // let legendAttack = Math.floor(Math.random() * 20 + 1);
+                let legendAttack = 20;
                 let legendDefense = Math.floor(Math.random() * 20 + 1);
 
                 // 1d20 roll to see if either side hits a crit(armor) which reduces the enemy damage to ~10% of their max
@@ -243,7 +244,7 @@ module.exports = {
             }
             else if (res.victor == 'Attackers' && res.legendAttackCheck && !res.legendDefenseCheck && !res.defenderMiracleCheck){
                 console.log('attacker damage crit succeeds')
-                imageURL = 'https://cdn2.picryl.com/photo/1839/12/31/bataille-de-smolensk-b92329-1024.jpg';
+                imageURL = 'https://img.apmcdn.org/a9bedc6f326e257120951467bf8c0c11f0c0f961/uncropped/58dbd1-20150327-capitolart2.jpg';
             }
             else if (res.victor == 'Attackers' && res.attackerMiracleCheck && !res.legendDefenseCheck && !res.defenderMiracleCheck){
                 console.log('attacker armor crit succeeds')
