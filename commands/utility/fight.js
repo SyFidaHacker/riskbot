@@ -54,8 +54,7 @@ module.exports = {
                 let defenderDamage = 0;
             
                 // 1d20 roll to see if either side hits a crit(damage) which deals ~90% max damage
-                // let legendAttack = Math.floor(Math.random() * 20 + 1);
-                let legendAttack = 20;
+                let legendAttack = Math.floor(Math.random() * 20 + 1);
                 let legendDefense = Math.floor(Math.random() * 20 + 1);
 
                 // 1d20 roll to see if either side hits a crit(armor) which reduces the enemy damage to ~10% of their max
