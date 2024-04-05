@@ -40,6 +40,10 @@ module.exports = {
             let totalAttackerDamage = 0;
             let totalDefenderDamage = 0;
             let rounds = 0;
+            let legendAttackCheck = false;
+            let attackerMiracleCheck = false;
+            let legendDefenseCheck = false;
+            let defenderMiracleCheck = false
 
             function calculateAttack(x, y){
                 // Increment round counter
@@ -66,6 +70,8 @@ module.exports = {
             
                     // Check if attackers crit(damage) and defenders crit(armor), setting accuracy to 50%
                     if (legendAttack == 20 && defenderMiracle == 20){
+                        legendAttackCheck = true;
+                        defenderMiracleCheck = true;
                         let shot = Math.random() * 2;
                         if (shot >= 1){
                             attackerDamage++;
@@ -74,6 +80,7 @@ module.exports = {
             
                     // Check to see if a crit(damage) is applicable, and if so, calculate shots at 90% accuracy
                     else if (legendAttack == 20){
+                        legendAttackCheck = true;
                         let shot = Math.random() * 10;
                         if (shot >= 1){
                             attackerDamage++;
@@ -82,6 +89,7 @@ module.exports = {
             
                     // Check if defenders rolled a crit(armor), and if so, calculate shots at 10% accuracy
                     else if (defenderMiracle == 20){
+                        defenderMiracleCheck = true;
                         let shot = Math.random() * 10;
                         if (shot >= 9){
                             attackerDamage++;
@@ -102,6 +110,8 @@ module.exports = {
             
                     // Offsetting crits check
                     if (legendDefense == 20 && attackerMiracle == 20){
+                        legendDefenseCheck = true;
+                        attackerMiracleCheck = true;
                         let shot = Math.random() * 2;
                         if (shot >= 1){
                             defenderDamage++;
@@ -110,6 +120,7 @@ module.exports = {
             
                     // Crit(damage) check
                     else if (legendDefense == 20){
+                        legendDefenseCheck = true;
                         let shot = Math.random() * 10;
                         if (shot >= 1){
                             defenderDamage++;
@@ -118,6 +129,7 @@ module.exports = {
             
                     // Attackers crit(armor) check
                     else if (attackerMiracle == 20){
+                        attackerMiracleCheck = true;
                         let shot = Math.random() * 10;
                         if (shot >= 9){
                             defenderDamage++;
@@ -163,7 +175,11 @@ module.exports = {
                     let response = {
                         attackers: x,
                         defenders: y,
-                        victor: victor
+                        victor: victor,
+                        legendAttackCheck: legendAttackCheck,
+                        attackerMiracleCheck: attackerMiracleCheck,
+                        legendDefenseCheck: legendDefenseCheck,
+                        defenderMiracleCheck: defenderMiracleCheck
                     }
                     return response;
                 }
@@ -172,7 +188,11 @@ module.exports = {
                     let response = {
                         attackers: x,
                         defenders: y,
-                        victor: victor
+                        victor: victor,
+                        legendAttackCheck: legendAttackCheck,
+                        attackerMiracleCheck: attackerMiracleCheck,
+                        legendDefenseCheck: legendDefenseCheck,
+                        defenderMiracleCheck: defenderMiracleCheck
                     }
                     return response;
                 }
@@ -181,7 +201,11 @@ module.exports = {
                     let response = {
                         attackers: x,
                         defenders: y,
-                        victor: victor
+                        victor: victor,
+                        legendAttackCheck: legendAttackCheck,
+                        attackerMiracleCheck: attackerMiracleCheck,
+                        legendDefenseCheck: legendDefenseCheck,
+                        defenderMiracleCheck: defenderMiracleCheck
                     }
                     return response;
                 }
@@ -190,7 +214,11 @@ module.exports = {
                     let response = {
                         attackers: x,
                         defenders: y,
-                        victor: victor
+                        victor: victor,
+                        legendAttackCheck: legendAttackCheck,
+                        attackerMiracleCheck: attackerMiracleCheck,
+                        legendDefenseCheck: legendDefenseCheck,
+                        defenderMiracleCheck: defenderMiracleCheck
                     }
                     return response;
                 }
@@ -200,11 +228,55 @@ module.exports = {
             }
             
             let res = calculateAttack(attackers, defenders);
+            let imageURL = '';
+            if ((res.legendAttackCheck || res.attackerMiracleCheck) && (res.legendDefenseCheck || res.defenderMiracleCheck)){
+                console.log('offset crits')
+                imageURL = 'https://smarthistory.org/wp-content/uploads/2021/02/233eaa4dec95a98d5ad5ba30be8f05a5-624x374.jpg';
+            }
+            else if ((res.legendAttackCheck || res.attackerMiracleCheck) && !res.legendDefenseCheck && !res.defenderMiracleCheck && res.victor == 'Defenders'){
+                console.log('attacker crit is defeated')
+                imageURL = 'https://d3d00swyhr67nd.cloudfront.net/w944h944/collection/LW/RHOC/LW_RHOC_8-001.jpg';
+            }
+            else if ((res.legendDefenseCheck || res.defenderMiracleCheck) && !res.legendAttackCheck && !res.attackerMiracleCheck && res.victor == 'Attackers'){
+                console.log('defender crit is defeated')
+                imageURL = 'https://www.onthisday.com/images/photos/battle-of-the-alamo.jpg';
+            }
+            else if (res.victor == 'Attackers' && res.legendAttackCheck && !res.legendDefenseCheck && !res.defenderMiracleCheck){
+                console.log('attacker damage crit succeeds')
+                imageURL = 'https://cdn2.picryl.com/photo/1839/12/31/bataille-de-smolensk-b92329-1024.jpg';
+            }
+            else if (res.victor == 'Attackers' && res.attackerMiracleCheck && !res.legendDefenseCheck && !res.defenderMiracleCheck){
+                console.log('attacker armor crit succeeds')
+                imageURL = 'https://news.yale.edu/sites/default/files/styles/featured_media/public/winslow-homer-cavalry-charge-civil-war.jpg?itok=gRERoFWP&c=07307e7d6a991172b9f808eb83b18804';
+            }
+            else if (res.victor == 'Defenders' && res.legendDefenseCheck && !res.legendAttackCheck && !res.attackerMiracleCheck){
+                console.log('defender damage crit succeeds')
+                imageURL = 'https://upload.wikimedia.org/wikipedia/commons/3/35/Battle_of_New_Orleans.jpg';
+            }
+            else if (res.victor == 'Defenders' && res.defenderMiracleCheck && !res.legendAttackCheck && !res.attackerMiracleCheck){
+                console.log('defender armor crit succeeds')
+                imageURL = 'https://arthive.net/res/media/img/oy400/work/ecd/691268@2x.jpg';
+            }
+            else if (res.victor == 'Attackers' && !res.legendAttackCheck && !res.attackerMiracleCheck && !res.legendDefenseCheck && !res.defenderMiracleCheck){
+                console.log('normal attacker victory')
+                imageURL = 'https://images.squarespace-cdn.com/content/v1/5caa57b7e8ba44f0a1ce6bb3/1555008937634-14180VXTA46NHER7H2B2/A01.jpg';
+            }
+            else if (res.victor == 'Defenders' && !res.legendAttackCheck && !res.attackerMiracleCheck && !res.legendDefenseCheck && !res.defenderMiracleCheck){
+                console.log('normal defender victory')
+                imageURL = 'https://ohiomagazine.imgix.net/sitefinity/images/default-source/articles/2015/april-2015/battle-h-1st-ohio-volunteers-by-gaul.jpg?sfvrsn=b370ae38_2&w=960&auto=compress%2Cformat';
+            }
+            else{
+                console.log('what the hell happened?')
+                console.log('legend attack: ' + res.legendAttackCheck)
+                console.log('attacker miracle: ' + res.attackerMiracleCheck)
+                console.log('legend defense: ' + res.legendDefenseCheck)
+                console.log('defender miracle: ' + res.defenderMiracleCheck)
+            }
 
             const exampleEmbed = new EmbedBuilder()
                 .setColor(0x0099FF)
                 .setTitle(`Jean Lafitte's Virginia Memorial Battle Simulator`)
-                .setImage('https://upload.wikimedia.org/wikipedia/commons/3/35/Battle_of_New_Orleans.jpg')
+                .setImage(`${imageURL}`)
                 .setDescription(`"Mama ain't raised no wuss" -Jean Lafitte, 1815`)
                 .addFields(
                     { name: '\u200B', value: '\u200B' },
