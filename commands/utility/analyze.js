@@ -2,8 +2,8 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('fight')
-        .setDescription('Calculates the result of a battle')
+        .setName('analyze')
+        .setDescription(`Provides intel on potential battles`)
         .addIntegerOption(option =>
             option.setName('attackers')
                 .setDescription(`The attacking army's troop count`)
@@ -31,7 +31,7 @@ module.exports = {
                     {name: 'Entrench', value: 'entrench'}
                 )),
         async execute(interaction) {
-            await interaction.reply({ content: 'Battle Commencing', ephemeral: true });
+            await interaction.reply({ content: 'Running simulation', ephemeral: true });
             await interaction.deleteReply();
             let attackers = interaction.options.getInteger('attackers');
             let defenders = interaction.options.getInteger('defenders');
@@ -39,11 +39,15 @@ module.exports = {
             let defenderStance = interaction.options.getString('defender_stance');
             let totalAttackerDamage = 0;
             let totalDefenderDamage = 0;
-            let rounds = 0;
+            let attackSimTotal = 0;
+            let defendSimTotal = 0;
+            let attackVictories = 0;
+            let defendVictories = 0;
+            let attackerOutdamages = 0;
+            let defenderOutdamages = 0;
+            let projectedVictor = '';
 
             function calculateAttack(x, y){
-                // Increment round counter
-                rounds++;
 
                 // Running totals of the casualties inflicted by each side
                 let attackerDamage = 0;
@@ -160,69 +164,102 @@ module.exports = {
                 // Check if battle should run again based on army stance and troop count
                 if (x > 0 && y > 0 && attackerStance == 'assault' && defenderStance == 'retreat'){
                     victor = 'Attackers';
-                    let response = {
-                        attackers: x,
-                        defenders: y,
-                        victor: victor
+                    attackVictories++;
+                    attackSimTotal += totalAttackerDamage;
+                    defendSimTotal += totalDefenderDamage;
+                    if (totalAttackerDamage > totalDefenderDamage){
+                        attackerOutdamages++;
                     }
-                    return response;
+                    else{
+                        defenderOutdamages++;
+                    }
+                    totalAttackerDamage = 0;
+                    totalDefenderDamage = 0;
+                    return;
                 }
                 else if (y > 0 && attackerStance == 'raid'){
                     victor = 'Defenders';
-                    let response = {
-                        attackers: x,
-                        defenders: y,
-                        victor: victor
+                    defendVictories++;
+                    attackSimTotal += totalAttackerDamage;
+                    defendSimTotal += totalDefenderDamage;
+                    if (totalAttackerDamage > totalDefenderDamage){
+                        attackerOutdamages++;
                     }
-                    return response;
+                    else{
+                        defenderOutdamages++;
+                    }
+                    totalAttackerDamage = 0;
+                    totalDefenderDamage = 0;
+                    return;
                 }
                 else if (x < 1){
                     victor = 'Defenders';
-                    let response = {
-                        attackers: x,
-                        defenders: y,
-                        victor: victor
+                    defendVictories++;
+                    attackSimTotal += totalAttackerDamage;
+                    defendSimTotal += totalDefenderDamage;
+                    if (totalAttackerDamage > totalDefenderDamage){
+                        attackerOutdamages++;
                     }
-                    return response;
+                    else{
+                        defenderOutdamages++;
+                    }
+                    totalAttackerDamage = 0;
+                    totalDefenderDamage = 0;
+                    return;
                 }
                 else if (y < 1){
                     victor = 'Attackers';
-                    let response = {
-                        attackers: x,
-                        defenders: y,
-                        victor: victor
+                    attackVictories++;
+                    attackSimTotal += totalAttackerDamage;
+                    defendSimTotal += totalDefenderDamage;
+                    if (totalAttackerDamage > totalDefenderDamage){
+                        attackerOutdamages++;
                     }
-                    return response;
+                    else{
+                        defenderOutdamages++;
+                    }
+                    totalAttackerDamage = 0;
+                    totalDefenderDamage = 0;
+                    return;
                 }
                 else if (x > 0 && y > 0 && attackerStance == 'assault' && defenderStance == 'entrench'){
-                    return calculateAttack(x, y);
+                    calculateAttack(x, y);
                 }
             }
+
+            for (let i = 0; i < 1000; i++){
+                calculateAttack(attackers, defenders,);
+            }
+
+            if (attackVictories > defendVictories){
+                projectedVictor = 'Attackers';
+            }
+            else{
+                projectedVictor = 'Defenders'
+            }
             
-            let res = calculateAttack(attackers, defenders);
 
             const exampleEmbed = new EmbedBuilder()
                 .setColor(0x0099FF)
                 .setTitle(`Jean Lafitte's Virginia Memorial Battle Simulator`)
-                .setImage('https://upload.wikimedia.org/wikipedia/commons/3/35/Battle_of_New_Orleans.jpg')
-                .setDescription(`"Mama ain't raised no wuss" -Jean Lafitte, 1815`)
+                .setImage('https://render.fineartamerica.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/2/planning-a-maneuver-1841-1850-mapping-the-exercise-henry-alexander-ogden.jpg')
+                .setDescription(`"If you fail to prepare, you're preparing to fail" -Jean Lafitte, 1811`)
                 .addFields(
                     { name: '\u200B', value: '\u200B' },
-                    { name: 'Initial Attackers', value: `${attackers}`, inline: true },
-                    { name: 'Initial Defenders', value: `${defenders}`, inline: true },
+                    { name: 'Expected Attackers', value: `${attackers}`, inline: true },
+                    { name: 'Expected Defenders', value: `${defenders}`, inline: true },
                     { name: '\u200B', value: '\u200B' },
-                    { name: 'Attacker stance', value: `${attackerStance}`, inline: true },
-                    { name: 'Defender stance', value: `${defenderStance}`, inline: true },
+                    { name: 'Expected Attacker Stance', value: `${attackerStance}`, inline: true },
+                    { name: 'Expected Defender Stance', value: `${defenderStance}`, inline: true },
                     { name: '\u200B', value: '\u200B' },
-                    { name: 'Attacker casualties', value: `${totalDefenderDamage}`, inline: true },
-                    { name: 'Defender casualties', value: `${totalAttackerDamage}`, inline: true },
+                    { name: '\u200B', value: 'Likelihood of inflicting more casualties:'},
+                    { name: 'Attackers', value: `${Math.round(((attackerOutdamages / 1000) * 100) * 10) / 10}%`, inline: true },
+                    { name: 'Defenders', value: `${Math.round(((defenderOutdamages / 1000) * 100) * 10) / 10}%`, inline: true },
                     { name: '\u200B', value: '\u200B' },
-                    { name: 'Attackers remaining', value: `${res.attackers}`, inline: true },
-                    { name: 'Defenders remaining', value: `${res.defenders}`, inline: true },
+                    { name: 'Attacker Average Casualties', value: `${Math.round(defendSimTotal / 1000)}`, inline: true },
+                    { name: 'Defender Average Casualties', value: `${Math.round(attackSimTotal / 1000)}`, inline: true },
                     { name: '\u200B', value: '\u200B' },
-                    { name: 'Rounds fought', value: `${rounds}`, inline: true },
-                    { name: 'Victor', value: `${res.victor}`, inline: true },
-                    { name: '\u200B', value: '\u200B' }
+                    { name: 'Projected Victor', value: `${projectedVictor}`, inline: true },
                 )
                 .setTimestamp();
 
