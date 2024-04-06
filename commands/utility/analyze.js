@@ -170,8 +170,12 @@ module.exports = {
                     if (totalAttackerDamage > totalDefenderDamage){
                         attackerOutdamages++;
                     }
-                    else{
+                    else if (totalDefenderDamage > totalAttackerDamage){
                         defenderOutdamages++;
+                    }
+                    else{
+                        attackerOutdamages += 0.5;
+                        defenderOutdamages += 0.5;
                     }
                     totalAttackerDamage = 0;
                     totalDefenderDamage = 0;
@@ -185,8 +189,12 @@ module.exports = {
                     if (totalAttackerDamage > totalDefenderDamage){
                         attackerOutdamages++;
                     }
-                    else{
+                    else if (totalDefenderDamage > totalAttackerDamage){
                         defenderOutdamages++;
+                    }
+                    else{
+                        attackerOutdamages += 0.5;
+                        defenderOutdamages += 0.5;
                     }
                     totalAttackerDamage = 0;
                     totalDefenderDamage = 0;
@@ -200,8 +208,12 @@ module.exports = {
                     if (totalAttackerDamage > totalDefenderDamage){
                         attackerOutdamages++;
                     }
-                    else{
+                    else if (totalDefenderDamage > totalAttackerDamage){
                         defenderOutdamages++;
+                    }
+                    else{
+                        attackerOutdamages += 0.5;
+                        defenderOutdamages += 0.5;
                     }
                     totalAttackerDamage = 0;
                     totalDefenderDamage = 0;
@@ -215,8 +227,12 @@ module.exports = {
                     if (totalAttackerDamage > totalDefenderDamage){
                         attackerOutdamages++;
                     }
-                    else{
+                    else if (totalDefenderDamage > totalAttackerDamage){
                         defenderOutdamages++;
+                    }
+                    else{
+                        attackerOutdamages += 0.5;
+                        defenderOutdamages += 0.5;
                     }
                     totalAttackerDamage = 0;
                     totalDefenderDamage = 0;
