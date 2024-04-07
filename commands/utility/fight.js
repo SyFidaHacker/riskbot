@@ -138,9 +138,17 @@ module.exports = {
             
                     // Normal shot calculation against attacker's skill score
                     else{
-                        let shot = Math.random() * (attackerSkill + 1);
-                        if (shot >= attackerSkill){
-                            defenderDamage++;
+                        if (defenderStance == 'entrench'){
+                            let shot = Math.random() * (attackerSkill + 10);
+                            if (shot >= attackerSkill + 2.5){
+                                defenderDamage++;
+                            }
+                        }
+                        else{
+                            let shot = Math.random() * (attackerSkill + 1);
+                            if (shot >= attackerSkill){
+                                defenderDamage++;
+                            }
                         }
                     }
                 }
