@@ -55,6 +55,8 @@ module.exports = {
             let defendStrategicVictories = 0;
             let garrisonCheck = false;
             let entrenchCheck = false;
+            let attackerSkillDisplay = attackerSkill;
+            let defenderSkillDisplay = defenderSkill;
 
             function calculateAttack(x, y){
 
@@ -66,6 +68,12 @@ module.exports = {
                 else if (defenderSkill == -1){
                     defenderSkill = 4;
                     entrenchCheck = true;
+                }
+
+                // Calculate relative strength:
+                while (attackerSkill > 1 && defenderSkill > 1){
+                    attackerSkill--;
+                    defenderSkill--;
                 }
 
                 // Running totals of the casualties inflicted by each side
@@ -220,8 +228,8 @@ module.exports = {
                     { name: 'Expected Attackers', value: `${attackers}`, inline: true },
                     { name: 'Expected Defenders', value: `${defenders}`, inline: true },
                     { name: '\u200B', value: '\u200B' },
-                    { name: 'Attacker skill level', value: `${attackerSkill}`, inline: true },
-                    { name: 'Defender skill level', value: `${defenderSkill}`, inline: true },
+                    { name: 'Attacker skill level', value: `${attackerSkillDisplay}`, inline: true },
+                    { name: 'Defender skill level', value: `${defenderSkillDisplay}`, inline: true },
                     { name: '\u200B', value: '\u200B' },
                     { name: '\u200B', value: '__**Expected outcomes:**__'},
                     { name: 'Attacker total victory', value: `${Math.round(((attackVictories / 1000) * 100) * 10) / 10}%`, inline: true },

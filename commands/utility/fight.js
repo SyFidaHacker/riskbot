@@ -65,6 +65,12 @@ module.exports = {
                     console.log('Entrenchment fight. Defender skill: ' + defenderSkill)
                 }
 
+                // Calculate relative strength:
+                while (attackerSkill > 1 && defenderSkill > 1){
+                    attackerSkill--;
+                    defenderSkill--;
+                }
+
                 // Running totals of the casualties inflicted by each side
                 let attackerDamage = 0;
                 let defenderDamage = 0;
