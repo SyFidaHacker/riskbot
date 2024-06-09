@@ -83,8 +83,8 @@ module.exports = {
             
                 // Loop through the defending troops, doing the same thing
                 for (i = 0; i < y; i++){
-                    let shot = Math.random() * (attackerSkill + 1);
-                    if (shot >= attackerSkill){
+                    let shot = Math.random() * 10;
+                    if (shot >= 4 + attackerSkill){
                         defenderDamage++;
                     }
                 }
