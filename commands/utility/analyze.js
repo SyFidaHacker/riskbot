@@ -59,6 +59,8 @@ module.exports = {
             let defenderSkillDisplay = defenderSkill;
 
             function calculateAttack(x, y){
+                // Save initial attacker skill level in case of garrison/entrenchment fight
+                let initialAttackerSkill = attackerSkill;
 
                 // Randomly generate defender skill for garrison battles
                 if (defenderSkill == 0){
@@ -103,9 +105,11 @@ module.exports = {
                 // Reset defender and attacker skills for garrison and entrenchment battles
                 if (garrisonCheck){
                     defenderSkill = 0;
+                    attackerSkill = initialAttackerSkill;
                 }
                 if (entrenchCheck){
                     defenderSkill = -1;
+                    attackerSkill = initialAttackerSkill;
                 }
 
                 // Check for attacker crits
