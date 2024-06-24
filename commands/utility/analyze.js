@@ -62,6 +62,14 @@ module.exports = {
                 // Save initial attacker skill level in case of garrison/entrenchment fight
                 let initialAttackerSkill = attackerSkill;
 
+                // Prevent strange defender skill displays
+                if (defenderSkillDisplay == 0){
+                    defenderSkillDisplay = 'Garrison (1-3)'
+                }
+                if (defenderSkillDisplay == -1){
+                    defenderSkillDisplay = 'Entrenchment (4)'
+                }
+
                 // Randomly generate defender skill for garrison battles
                 if (defenderSkill == 0){
                     defenderSkill = Math.floor(Math.random() * 3 + 1)
