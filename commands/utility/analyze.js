@@ -208,7 +208,6 @@ module.exports = {
 
             console.log('attacker victories: ' + attackVictories)
             console.log('defender victories: ' + defendVictories)
-            
 
             const exampleEmbed = new EmbedBuilder()
                 .setColor(0x0099FF)
