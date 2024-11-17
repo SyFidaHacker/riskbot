@@ -49,99 +49,40 @@ module.exports = {
 
             function calculateAttack(x, y){
 
+                // Base damage variable
+                let baseDamage = 0.5;
+
                 // Running totals of the casualties inflicted by each side
                 let attackerDamage = 0;
                 let defenderDamage = 0;
             
-                // 1d20 roll to see if either side hits a crit(damage) which deals ~90% max damage
-                let legendAttack = Math.floor(Math.random() * 20 + 1);
-                let legendDefense = Math.floor(Math.random() * 20 + 1);
+                // Damage modifier variables
+                let damageMod;
+                let defenseMod;
 
-                // 1d20 roll to see if either side hits a crit(armor) which reduces the enemy damage to ~10% of their max
-                let attackerMiracle = Math.floor(Math.random() * 20 + 1);
-                let defenderMiracle = Math.floor(Math.random() * 20 + 1);
-            
-                // A random score to measure how effectively each side mitigates its own losses (the higher the better)
-                let attackerSkill = Math.floor(Math.random() * 4 + 1)
-                let defenderSkill = Math.floor(Math.random() * 4 + 1)
+                // Alter damage modifiers based on army stances
+                if (defenderStance == "entrench"){
+                    damageMod = 1.25;
+                    defenseMod = 1;
+                }
+                else{
+                    damageMod = 1;
+                    defenseMod = 1.25;
+                }
             
                 // Loop through every attacking troop to see if its "shot" hit or missed
                 for (i = 0; i < x; i++){
-            
-                    // Check if attackers crit(damage) and defenders crit(armor), setting accuracy to 50%
-                    if (legendAttack == 20 && defenderMiracle == 20){
-                        let shot = Math.random() * 2;
-                        if (shot >= 1){
-                            attackerDamage++;
-                        }
-                    }
-            
-                    // Check to see if a crit(damage) is applicable, and if so, calculate shots at 90% accuracy
-                    else if (legendAttack == 20){
-                        let shot = Math.random() * 10;
-                        if (shot >= 1){
-                            attackerDamage++;
-                        }
-                    }
-            
-                    // Check if defenders rolled a crit(armor), and if so, calculate shots at 10% accuracy
-                    else if (defenderMiracle == 20){
-                        let shot = Math.random() * 10;
-                        if (shot >= 9){
-                            attackerDamage++;
-                        }
-                    }
-            
-                    // Normal calculation, roll a dice to see if a troop's shot hits against the defender's skill score
-                    else{
-                        let shot = Math.random() * (defenderSkill + 1);
-                        if (shot >= defenderSkill){
-                            attackerDamage++;
-                        }
+                    let shot = Math.random();
+                    if (shot >= (baseDamage * defenseMod)){
+                        attackerDamage++;
                     }
                 }
             
                 // Loop through the defending troops, doing the same thing
                 for (i = 0; i < y; i++){
-            
-                    // Offsetting crits check
-                    if (legendDefense == 20 && attackerMiracle == 20){
-                        let shot = Math.random() * 2;
-                        if (shot >= 1){
-                            defenderDamage++;
-                        }
-                    }
-            
-                    // Crit(damage) check
-                    else if (legendDefense == 20){
-                        let shot = Math.random() * 10;
-                        if (shot >= 1){
-                            defenderDamage++;
-                        }
-                    }
-            
-                    // Attackers crit(armor) check
-                    else if (attackerMiracle == 20){
-                        let shot = Math.random() * 10;
-                        if (shot >= 9){
-                            defenderDamage++;
-                        }
-                    }
-            
-                    // Normal shot calculation against attacker's skill score
-                    else{
-                        if (defenderStance == 'entrench'){
-                            let shot = Math.random() * (attackerSkill + 10);
-                            if (shot >= attackerSkill + 2.5){
-                                defenderDamage++;
-                            }
-                        }
-                        else{
-                            let shot = Math.random() * (attackerSkill + 1);
-                            if (shot >= attackerSkill){
-                                defenderDamage++;
-                            }
-                        }
+                    let shot = Math.random();
+                    if (shot <= (baseDamage * damageMod)){
+                        defenderDamage++;
                     }
                 }
 
@@ -258,8 +199,11 @@ module.exports = {
             if (attackVictories > defendVictories){
                 projectedVictor = 'Attackers';
             }
-            else{
+            else if (defendVictories > attackVictories){
                 projectedVictor = 'Defenders'
+            }
+            else{
+                projectedVictor = 'Too close to call';
             }
 
             console.log('attacker victories: ' + attackVictories)
