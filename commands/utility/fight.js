@@ -55,8 +55,11 @@ module.exports = {
             let totalDefenderRouts = 0;
             let rounds = 0;
 
+            // Console logs: Battle initiation
             console.log('------------------------------')
             console.log('------------------------------')
+            console.log('from: ' + attackerState)
+            console.log('to: ' + defenderState)
 
             // Bases chance to hit variables:
             let attackerChanceToHit;

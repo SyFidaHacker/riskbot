@@ -19,16 +19,18 @@ module.exports = {
                 .setDescription(`Attacking army's stance`)
                 .setRequired(true)
                 .addChoices(
-                    {name: 'Raid', value: 'raid'},
-                    {name: 'Assault', value: 'assault'}
+                    {name: 'Assault', value: 'Assault'},
+                    {name: 'Raid', value: 'Raid'},
+                    {name: 'Shock', value: 'Shock'}
                 ))
         .addStringOption(option =>
             option.setName('defender_stance')
                 .setDescription(`Defending army's stance`)
                 .setRequired(true)
                 .addChoices(
-                    {name: 'Retreat', value: 'retreat'},
-                    {name: 'Entrench', value: 'entrench'}
+                    {name: 'Hold', value: 'Hold'},
+                    {name: 'Retreat', value: 'Retreat'},
+                    {name: 'Entrench', value: 'Entrench'}
                 )),
         async execute(interaction) {
             await interaction.reply({ content: 'Running simulation', ephemeral: true });
@@ -37,174 +39,222 @@ module.exports = {
             let defenders = interaction.options.getInteger('defenders');
             let attackerStance = interaction.options.getString('attacker_stance');
             let defenderStance = interaction.options.getString('defender_stance');
-            let totalAttackerDamage = 0;
-            let totalDefenderDamage = 0;
-            let attackSimTotal = 0;
-            let defendSimTotal = 0;
+            let totalAttackerDeaths = 0;
+            let totalDefenderDeaths = 0;
+            let totalAttackerRouts = 0;
+            let totalDefenderRouts = 0;
+            let attackerKillCount = 0;
+            let defenderKillCount = 0;
+            let rounds = 0;
             let attackVictories = 0;
             let defendVictories = 0;
+            let draws = 0;
             let attackerOutdamages = 0;
             let defenderOutdamages = 0;
-            let projectedVictor = '';
+            let projectedOutcome = '';
+
+            // Bases chance to hit variables:
+            let attackerChanceToHit;
+            let defenderChanceToHit;
 
             function calculateAttack(x, y){
 
-                // Base damage variable
-                let baseDamage = 0.5;
+                // Increment round counter
+                rounds++;
 
-                // Running totals of the casualties inflicted by each side
-                let attackerDamage = 0;
-                let defenderDamage = 0;
+                // // Check if round 1
+                if (rounds == 1){
+                    attackerChanceToHit = Math.floor(Math.random() * 21 + 10)/100;
+                    defenderChanceToHit = Math.floor(Math.random() * 21 + 10)/100;
+                }
+
+                // Running totals of the kills inflicted by each side
+                let attackerDeaths = 0;
+                let defenderDeaths = 0;
+
+                // Running totals of routed troops for each side
+                let attackerRouts = 0;
+                let defenderRouts = 0;
+
+                // Base chance to rout variables:
+                let attackerChanceToRout = 0.25;
+                let defenderChanceToRout = 0.25;
+
+                // Alter damage and rout modifiers based on army stances
+                if (attackerStance == 'Raid'){
+                    attackerChanceToHit = 0.75;
+                    defenderChanceToRout = 0.1;
+                    if (startingAttackers > Math.floor(startingDefenders / 4) && rounds == 1){
+                        x = Math.floor(startingDefenders / 4);
+                    }
+                }
+                if (attackerStance == 'Shock'){
+                    attackerChanceToRout = 0;
+                    if (defenderStance != 'Entrench'){
+                        defenderChanceToHit/= 1.75;
+                        defenderChanceToRout = 0.9;
+                    }
+                }
+                if (defenderStance == 'Entrench'){
+                    defenderChanceToRout = 0;
+                    if (attackerStance != 'Shock'){
+                        attackerChanceToHit/= 1.75;
+                        attackerChanceToRout = 0.9;
+                    }
+                }
+                if (defenderStance == 'Retreat'){
+                    defenderChanceToRout = 0.9;
+                    defenderChanceToHit*= 0.75;
+                }
             
-                // Damage modifier variables
-                let damageMod;
-                let defenseMod;
-
-                // Alter damage modifiers based on army stances
-                if (defenderStance == "entrench"){
-                    damageMod = 1.25;
-                    defenseMod = 1;
-                }
-                else{
-                    damageMod = 1;
-                    defenseMod = 1.25;
-                }
+                // Variable for each side's remaining troops
+                let currentAttackers = x;
+                let currentDefenders = y;
             
                 // Loop through every attacking troop to see if its "shot" hit or missed
                 for (i = 0; i < x; i++){
-                    let shot = Math.random();
-                    if (shot >= (baseDamage * defenseMod)){
-                        attackerDamage++;
+                    if (currentDefenders > 0){
+                        let shot = Math.random();
+                        if (shot >= (1 - attackerChanceToHit)){
+                            currentDefenders--;
+                            let shellShock = Math.random();
+                            if (shellShock >= (1 - defenderChanceToRout)){
+                                defenderRouts++;
+                            }
+                            else{
+                                defenderDeaths++;
+                            }
+                        }
                     }
                 }
-            
+
                 // Loop through the defending troops, doing the same thing
                 for (i = 0; i < y; i++){
-                    let shot = Math.random();
-                    if (shot <= (baseDamage * damageMod)){
-                        defenderDamage++;
+                    if (currentAttackers > 0){
+                        let shot = Math.random();
+                        if (shot >= (1 - defenderChanceToHit)){
+                            currentAttackers--;
+                            let shellShock = Math.random();
+                            if (shellShock >= (1 - attackerChanceToRout)){
+                                attackerRouts++;
+                            }
+                            else{
+                                attackerDeaths++;
+                            }
+                        }
                     }
                 }
 
-                // Add each side's damage to the running total
-                totalAttackerDamage+= attackerDamage;
-                totalDefenderDamage+= defenderDamage;
-            
-                // Calculate remaining troops by subtracting damage
-                x -= defenderDamage;
-                y -= attackerDamage;
-                
-                // Ensure remaining totals aren't displayed as a negative value
-                if (x < 0){
-                    x = 0;
-                }
-                if (y < 0){
-                    y = 0;
-                }
+                // Add each side's kills to the running total
+                totalAttackerDeaths+= attackerDeaths;
+                totalDefenderDeaths+= defenderDeaths;
 
-                // Ensure that total damage counters do not exceed the original troop counts
-                if (totalAttackerDamage > defenders){
-                    totalAttackerDamage = defenders;
-                }
-                if (totalDefenderDamage > attackers){
-                    totalDefenderDamage = attackers;
-                }
+                // Add each side's routs to the running total
+                totalAttackerRouts+= attackerRouts;
+                totalDefenderRouts+= defenderRouts;
+
+                // Calculate remaining troops by subtracting damage
+                x -= (attackerDeaths + attackerRouts);
+                y -= (defenderDeaths + defenderRouts);
+
+                // Add each side's kills to kill count check
+                attackerKillCount+= defenderDeaths;
+                defenderKillCount+= attackerDeaths;
 
                 // Check if battle should run again based on army stance and troop count
-                if (x > 0 && y > 0 && attackerStance == 'assault' && defenderStance == 'retreat'){
-                    victor = 'Attackers';
-                    attackVictories++;
-                    attackSimTotal += totalAttackerDamage;
-                    defendSimTotal += totalDefenderDamage;
-                    if (totalAttackerDamage > totalDefenderDamage){
+                if (x < 1 && y < 1){
+                    draws++;
+                    attackVictories+= 0.5;
+                    defendVictories+= 0.5;
+
+                    // Compare kill counts
+                    if (attackerKillCount > defenderKillCount){
                         attackerOutdamages++;
                     }
-                    else if (totalDefenderDamage > totalAttackerDamage){
+                    else if (defenderKillCount > attackerKillCount){
                         defenderOutdamages++;
                     }
                     else{
-                        attackerOutdamages += 0.5;
-                        defenderOutdamages += 0.5;
+                        attackerOutdamages+= 0.5;
+                        defenderOutdamages+= 0.5;
                     }
-                    totalAttackerDamage = 0;
-                    totalDefenderDamage = 0;
-                    return;
-                }
-                else if (y > 0 && attackerStance == 'raid'){
-                    victor = 'Defenders';
-                    defendVictories++;
-                    attackSimTotal += totalAttackerDamage;
-                    defendSimTotal += totalDefenderDamage;
-                    if (totalAttackerDamage > totalDefenderDamage){
-                        attackerOutdamages++;
-                    }
-                    else if (totalDefenderDamage > totalAttackerDamage){
-                        defenderOutdamages++;
-                    }
-                    else{
-                        attackerOutdamages += 0.5;
-                        defenderOutdamages += 0.5;
-                    }
-                    totalAttackerDamage = 0;
-                    totalDefenderDamage = 0;
-                    return;
+
+                    // Reset kill counts
+                    attackerKillCount = 0;
+                    defenderKillCount = 0;
+
+                    // Reset rounds
+                    rounds = 0;
                 }
                 else if (x < 1){
-                    victor = 'Defenders';
                     defendVictories++;
-                    attackSimTotal += totalAttackerDamage;
-                    defendSimTotal += totalDefenderDamage;
-                    if (totalAttackerDamage > totalDefenderDamage){
+
+                    // Compare kill counts
+                    if (attackerKillCount > defenderKillCount){
                         attackerOutdamages++;
                     }
-                    else if (totalDefenderDamage > totalAttackerDamage){
+                    else if (defenderKillCount > attackerKillCount){
                         defenderOutdamages++;
                     }
                     else{
-                        attackerOutdamages += 0.5;
-                        defenderOutdamages += 0.5;
+                        attackerOutdamages+= 0.5;
+                        defenderOutdamages+= 0.5;
                     }
-                    totalAttackerDamage = 0;
-                    totalDefenderDamage = 0;
-                    return;
+
+                    // Reset kill counts
+                    attackerKillCount = 0;
+                    defenderKillCount = 0;
+            
+                    // Reset rounds
+                    rounds = 0;
                 }
                 else if (y < 1){
-                    victor = 'Attackers';
                     attackVictories++;
-                    attackSimTotal += totalAttackerDamage;
-                    defendSimTotal += totalDefenderDamage;
-                    if (totalAttackerDamage > totalDefenderDamage){
+
+                    // Compare kill counts
+                    if (attackerKillCount > defenderKillCount){
                         attackerOutdamages++;
                     }
-                    else if (totalDefenderDamage > totalAttackerDamage){
+                    else if (defenderKillCount > attackerKillCount){
                         defenderOutdamages++;
                     }
                     else{
-                        attackerOutdamages += 0.5;
-                        defenderOutdamages += 0.5;
+                        attackerOutdamages+= 0.5;
+                        defenderOutdamages+= 0.5;
                     }
-                    totalAttackerDamage = 0;
-                    totalDefenderDamage = 0;
-                    return;
+
+                    // Reset kill counts
+                    attackerKillCount = 0;
+                    defenderKillCount = 0;
+            
+                    // Reset rounds
+                    rounds = 0;
                 }
-                else if (x > 0 && y > 0 && attackerStance == 'assault' && defenderStance == 'entrench'){
-                    calculateAttack(x, y);
+                else{
+                    return calculateAttack(x, y, attackerStance, defenderStance);
                 }
             }
 
-            for (let i = 0; i < 1000; i++){
-                calculateAttack(attackers, defenders,);
+            for (let i = 0; i < 10000; i++){
+                calculateAttack(attackers, defenders);
             }
 
             if (attackVictories > defendVictories){
-                projectedVictor = 'Attackers';
+                projectedOutcome = 'Attackers take the state';
             }
             else if (defendVictories > attackVictories){
-                projectedVictor = 'Defenders'
+                projectedOutcome = 'Defenders keep the state'
             }
             else{
                 projectedVictor = 'Too close to call';
             }
+
+            let attackerMean = (Math.round((totalAttackerDeaths + totalAttackerRouts) / 10000));
+            let defenderMean = (Math.round((totalDefenderDeaths + totalDefenderRouts) / 10000));
+            let attackerMeanDeath = (Math.round(totalAttackerDeaths / 10000));
+            let attackerMeanRout = (Math.round(totalAttackerRouts / 10000));
+            let defenderMeanDeath = (Math.round(totalDefenderDeaths / 10000));
+            let defenderMeanRout = (Math.round(totalDefenderRouts / 10000));
 
             console.log('attacker victories: ' + attackVictories)
             console.log('defender victories: ' + defendVictories)
@@ -222,14 +272,24 @@ module.exports = {
                     { name: 'Expected Attacker Stance', value: `${attackerStance}`, inline: true },
                     { name: 'Expected Defender Stance', value: `${defenderStance}`, inline: true },
                     { name: '\u200B', value: '\u200B' },
-                    { name: '\u200B', value: 'Likelihood of inflicting more casualties:'},
-                    { name: 'Attackers', value: `${Math.round(((attackerOutdamages / 1000) * 100) * 10) / 10}%`, inline: true },
-                    { name: 'Defenders', value: `${Math.round(((defenderOutdamages / 1000) * 100) * 10) / 10}%`, inline: true },
+                    { name: 'Average Attacker Deaths', value: `${attackerMeanDeath}`, inline: true },
+                    { name: 'Average Defender Deaths', value: `${defenderMeanDeath}`, inline: true },
                     { name: '\u200B', value: '\u200B' },
-                    { name: 'Attacker Average Casualties', value: `${Math.round(defendSimTotal / 1000)}`, inline: true },
-                    { name: 'Defender Average Casualties', value: `${Math.round(attackSimTotal / 1000)}`, inline: true },
+                    { name: 'Average Routed Attackers', value: `${attackerMeanRout}`, inline: true },
+                    { name: 'Average Routed Defenders', value: `${defenderMeanRout}`, inline: true },
                     { name: '\u200B', value: '\u200B' },
-                    { name: 'Projected Victor', value: `${projectedVictor}`, inline: true },
+                    { name: 'Average Attacker Combined Casualties', value: `${attackerMean}`, inline: true },
+                    { name: 'Average Defender Combined Casualties', value: `${defenderMean}`, inline: true },
+                    { name: '\u200B', value: '\u200B' },
+                    { name: '\u200B', value: 'Likelihood of inflicting more kills:'},
+                    { name: 'Attackers', value: `${Math.round(((attackerOutdamages / 10000) * 100) * 10) / 10}%`, inline: true },
+                    { name: 'Defenders', value: `${Math.round(((defenderOutdamages / 10000) * 100) * 10) / 10}%`, inline: true },
+                    { name: '\u200B', value: '\u200B' },
+                    { name: '\u200B', value: 'Likelihood of winning the state:'},
+                    { name: 'Attackers', value: `${Math.round(((attackVictories / 10000) * 100) * 10) / 10}%`, inline: true },
+                    { name: 'Defenders', value: `${Math.round(((defendVictories / 10000) * 100) * 10) / 10}%`, inline: true },
+                    { name: '\u200B', value: '\u200B' },
+                    { name: 'Projected Outcome', value: `${projectedOutcome}`, inline: true },
                 )
                 .setTimestamp();
 
