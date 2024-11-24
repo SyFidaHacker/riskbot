@@ -146,7 +146,7 @@ module.exports = {
                         if (shot >= (1 - attackerChanceToHit)){
                             currentDefenders--;
                             let shellShock = Math.random();
-                            if (shellShock >= (1 - attackerChanceToRout)){
+                            if (shellShock >= (1 - defenderChanceToRout)){
                                 defenderRouts++;
                             }
                             else{
@@ -163,7 +163,7 @@ module.exports = {
                         if (shot >= (1 - defenderChanceToHit)){
                             currentAttackers--;
                             let shellShock = Math.random();
-                            if (shellShock >= (1 - defenderChanceToRout)){
+                            if (shellShock >= (1 - attackerChanceToRout)){
                                 attackerRouts++;
                             }
                             else{
