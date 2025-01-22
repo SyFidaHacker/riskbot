@@ -106,8 +106,8 @@ module.exports = {
                 if (attackerStance == 'Raid'){
                     attackerChanceToHit = 0.75;
                     defenderChanceToRout = 0.1;
-                    if (startingAttackers > Math.floor(startingDefenders / 4) && rounds == 1){
-                        x = Math.floor(startingDefenders / 4);
+                    if (attackers > Math.floor(defenders / 4) && rounds == 1){
+                        x = Math.floor(defenders / 4);
                     }
                 }
                 if (attackerStance == 'Shock'){
