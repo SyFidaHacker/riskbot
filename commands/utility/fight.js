@@ -21,24 +21,53 @@ module.exports = {
             let defenders = -interaction.options.getInteger('defenders');
             let attackersRemaining = attackers;
             let defendersRemaining = defenders;
+            let winner;
 
             console.log("attackers: " + attackers)
-            console.log.apply("defenders: " + defenders)
+            console.log("defenders: " + -defenders)
 
-            let res = Math.floor(Math.random() * (attackers - defenders + 1) + defenders);
-            console.log("result: " + res)
+            let result = Math.floor(Math.random() * (attackers - defenders + 1) + defenders);
+            console.log("result: " + result)
 
-            if (res > 0){
-                defendersRemaining -= res;
-                attackersRemaining -= Math.floor(Math.random() * ((res * 0.6) - (res * 0.2) + 1) + (res * 0.2));
+            function calc(x){
+                if (x > 0){
+                    winner = "Attackers";
+                    console.log("winner: " + winner)
+                    let winnerLosses = Math.floor(Math.random() * ((Math.ceil(x * 0.6)) - Math.floor((x * 0.2)) + 1) + Math.floor((x * 0.2)));
+                    console.log("attackers win, and lose " + winnerLosses + " troops")
+                    defendersRemaining += x;
+                    attackersRemaining -= winnerLosses;
+                    console.log("attackers left: " + attackersRemaining)
+                    console.log("defenders left: " + -defendersRemaining)
+                    let response = {
+                        winner: winner,
+                        attackersRemaining: attackersRemaining,
+                        defendersRemaining: defendersRemaining
+                    }
+                    return response;
+                }
+                else if (x < 0){
+                    winner = "Defenders";
+                    console.log("winner: " + winner)
+                    let winnerLosses = Math.floor(Math.random() * ((Math.ceil(x * 0.6)) - Math.floor((x * 0.2)) + 1) + Math.floor((x * 0.2)));
+                    console.log("defenders win, and lose " + -winnerLosses + " troops")
+                    attackersRemaining += x;
+                    defendersRemaining -= winnerLosses;
+                    console.log("attackers left: " + attackersRemaining)
+                    console.log("defenders left: " + -defendersRemaining)
+                    let response = {
+                        winner: winner,
+                        attackersRemaining: attackersRemaining,
+                        defendersRemaining: defendersRemaining
+                    }
+                    return response;
+                }
+                else{
+                    calc(x);
+                }
             }
-            else if (res < 0){
-                attackersRemaining += res;
-                defendersRemaining += Math.floor(Math.random() * ((res * 0.6) - (res * 0.2) + 1) + (res * 0.2));
-            }
 
-            console.log("attackers left: " + attackersRemaining)
-            console.log("defenders left: " + defendersRemaining)
+            let res = calc(result);
 
             // Embed image
             let imageURL = 'https://d3d00swyhr67nd.cloudfront.net/w944h944/collection/LW/RHOC/LW_RHOC_8-001.jpg';
@@ -46,15 +75,20 @@ module.exports = {
             // Embed builder
             const exampleEmbed = new EmbedBuilder()
                 .setColor('#fc0303')
-                .setTitle(`Johann von Füßen Kampfcomputer`)
+                .setTitle(`Jean Lafitte Battle Simulator Lite`)
                 .setImage(`${imageURL}`)
                 .addFields(
+                    { name: '\u200B', value: '\u200B' },
                     { name: 'Initial Attackers', value: `${attackers}`, inline: true },
-                    { name: 'Initial Defenders', value: `${defenders}`, inline: true },
-                    { name: 'Outcome', value: `${res.outcome}`, inline: true },
-                    { name: 'Attackers remaining', value: `${totalAttackerDeaths}`, inline: true },
-                    { name: 'Defenders remaining', value: `${totalDefenderDeaths}`, inline: true },
-                    { name: '\u200B', value: '\u200B' }
+                    { name: 'Initial Defenders', value: `${-defenders}`, inline: true },
+                    { name: '\u200B', value: '\u200B' },
+                    { name: 'RNG Roll', value: `${result}`, inline: true },
+                    { name: `Winners' losses`, value: `${result}`, inline: true },
+                    { name: '\u200B', value: '\u200B' },
+                    { name: 'Attackers remaining', value: `${res.attackersRemaining}`, inline: true },
+                    { name: 'Defenders remaining', value: `${-res.defendersRemaining}`, inline: true },
+                    { name: 'Winner', value: `${res.winner}`, inline: true },
+                    
                 )
                 .setTimestamp();
 
