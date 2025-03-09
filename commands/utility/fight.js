@@ -37,12 +37,21 @@ module.exports = {
                     console.log("attackers win, and lose " + winnerLosses + " troops")
                     defendersRemaining += x;
                     attackersRemaining -= winnerLosses;
+                    if (attackersRemaining < 0){
+                        console.log("attacker damage exceeds troop count")
+                        attackersRemaining = 0;
+                    }
+                    if (defendersRemaining > 0){
+                        console.log("defender damage exceeds troop count")
+                        defendersRemaining = 0;
+                    }
                     console.log("attackers left: " + attackersRemaining)
                     console.log("defenders left: " + -defendersRemaining)
                     let response = {
                         winner: winner,
                         attackersRemaining: attackersRemaining,
-                        defendersRemaining: defendersRemaining
+                        defendersRemaining: defendersRemaining,
+                        winnerLosses:winnerLosses
                     }
                     return response;
                 }
@@ -53,12 +62,21 @@ module.exports = {
                     console.log("defenders win, and lose " + -winnerLosses + " troops")
                     attackersRemaining += x;
                     defendersRemaining -= winnerLosses;
+                    if (attackersRemaining < 0){
+                        console.log("attacker damage exceeds troop count")
+                        attackersRemaining = 0;
+                    }
+                    if (defendersRemaining > 0){
+                        console.log("defender damage exceeds troop count")
+                        defendersRemaining = 0;
+                    }
                     console.log("attackers left: " + attackersRemaining)
                     console.log("defenders left: " + -defendersRemaining)
                     let response = {
                         winner: winner,
                         attackersRemaining: attackersRemaining,
-                        defendersRemaining: defendersRemaining
+                        defendersRemaining: defendersRemaining,
+                        winnerLosses: -winnerLosses
                     }
                     return response;
                 }
@@ -83,7 +101,7 @@ module.exports = {
                     { name: 'Initial Defenders', value: `${-defenders}`, inline: true },
                     { name: '\u200B', value: '\u200B' },
                     { name: 'RNG Roll', value: `${result}`, inline: true },
-                    { name: `Winners' losses`, value: `${result}`, inline: true },
+                    { name: `Winners' losses`, value: `${res.winnerLosses}`, inline: true },
                     { name: '\u200B', value: '\u200B' },
                     { name: 'Attackers remaining', value: `${res.attackersRemaining}`, inline: true },
                     { name: 'Defenders remaining', value: `${-res.defendersRemaining}`, inline: true },

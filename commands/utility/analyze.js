@@ -30,12 +30,24 @@ module.exports = {
 
                 if (result > 0){
                     let winnerLosses = Math.floor(Math.random() * ((Math.ceil(result * 0.6)) - Math.floor((result * 0.2)) + 1) + Math.floor((result * 0.2)));
+                    if (winnerLosses > x){
+                        winnerLosses = x;
+                    }
+                    if (result > -y){
+                        result = -y;
+                    }
                     totalAttackerDeaths += winnerLosses;
                     totalDefenderDeaths += result;
                     attackerVictories++;
                 }
                 else if (result < 0){
                     let winnerLosses = Math.floor(Math.random() * ((Math.ceil(result * 0.6)) - Math.floor((result * 0.2)) + 1) + Math.floor((result * 0.2)));
+                    if (winnerLosses < y){
+                        winnerLosses = y;
+                    }
+                    if (result < -x){
+                        result = -x;
+                    }
                     totalAttackerDeaths -= result;
                     totalDefenderDeaths -= winnerLosses;
                     defenderVictories++;
