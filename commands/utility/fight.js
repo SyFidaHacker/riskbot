@@ -51,7 +51,8 @@ module.exports = {
                         winner: winner,
                         attackersRemaining: attackersRemaining,
                         defendersRemaining: defendersRemaining,
-                        winnerLosses:winnerLosses
+                        attackerLosses: winnerLosses,
+                        defenderLosses: result
                     }
                     return response;
                 }
@@ -76,7 +77,8 @@ module.exports = {
                         winner: winner,
                         attackersRemaining: attackersRemaining,
                         defendersRemaining: defendersRemaining,
-                        winnerLosses: -winnerLosses
+                        attackerLosses: -result,
+                        defenderLosses: -winnerLosses
                     }
                     return response;
                 }
@@ -97,16 +99,17 @@ module.exports = {
                 .setImage(`${imageURL}`)
                 .addFields(
                     { name: '\u200B', value: '\u200B' },
+                    { name: 'RNG Roll', value: `${result}`, inline: true },
+                    { name: 'Winner', value: `${res.winner}`, inline: true },
+                    { name: '\u200B', value: '\u200B' },
                     { name: 'Initial Attackers', value: `${attackers}`, inline: true },
                     { name: 'Initial Defenders', value: `${-defenders}`, inline: true },
                     { name: '\u200B', value: '\u200B' },
-                    { name: 'RNG Roll', value: `${result}`, inline: true },
-                    { name: `Winners' losses`, value: `${res.winnerLosses}`, inline: true },
+                    { name: 'Attacker losses', value: `${res.attackerLosses}`, inline: true },
+                    { name: `Defender' losses`, value: `${res.defenderLosses}`, inline: true },
                     { name: '\u200B', value: '\u200B' },
                     { name: 'Attackers remaining', value: `${res.attackersRemaining}`, inline: true },
-                    { name: 'Defenders remaining', value: `${-res.defendersRemaining}`, inline: true },
-                    { name: 'Winner', value: `${res.winner}`, inline: true },
-                    
+                    { name: 'Defenders remaining', value: `${-res.defendersRemaining}`, inline: true }
                 )
                 .setTimestamp();
 
